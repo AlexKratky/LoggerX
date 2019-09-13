@@ -1,0 +1,19 @@
+{
+    "name": "alexkratky/loggerx",
+    "description": "Class to easy work with logs.",
+    "keywords": ["php", "logs", "logging", "data"],
+    "homepage": "https://panx.eu/",
+    "license": ["MIT"],
+    "authors": [{
+            "name": "Alex Kratky",
+            "homepage": "https://alexkratky.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "alexkratky/cachex": "^0.1.0"
+    },
+    "autoload": {
+        "files": ["src/Logger.php"]
+    }
+}
