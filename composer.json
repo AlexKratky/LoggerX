@@ -11,7 +11,8 @@
     ],
     "require": {
         "php": ">=7.0",
-        "alexkratky/cachex": "^0.1.0"
+        "alexkratky/cachex": "^0.2.0",
+        "alexkratky/filestream": "^0.1.0"
     },
     "autoload": {
         "files": ["src/Logger.php"]

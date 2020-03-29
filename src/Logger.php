@@ -5,7 +5,7 @@
  * @link https://panx.eu/docs/                          Documentation
  * @link https://github.com/AlexKratky/panx-framework/  Github Repository
  * @author Alex Kratky <info@alexkratky.cz>
- * @copyright Copyright (c) 2019 Alex Kratky
+ * @copyright Copyright (c) 2020 Alex Kratky
  * @license http://opensource.org/licenses/mit-license.php MIT License
  * @description Class to work with logs. Part of panx-framework.
  */
@@ -15,9 +15,14 @@ declare (strict_types = 1);
 namespace AlexKratky;
 
 use AlexKratky\Cache;
+use AlexKratky\FileStream;
 
-class Logger
-{
+class Logger {
+
+    /**
+     * @var string|null The directory with logs. Absolute path.
+     */
+    private static $directory = null;
 
     /**
      * Writes data to log file.
@@ -26,31 +31,40 @@ class Logger
      * @param string|null $dir The base path, if sets to null: $_SERVER['DOCUMENT_ROOT'] . "/..".
      * @return false|int This function returns the number of bytes that were written to the log file, or FALSE on failure.
      */
-    public static function log(string $text, string $file = "main.log", ?string $dir = null)
-    {
+    public static function log(string $text, string $file = "main.log", ?string $dir = null) {
         $sizeCheck = Cache::get("__Logger__sizeChecked__$file.info", 60);
-        if ($dir === null) {
-            $dir = $_SERVER['DOCUMENT_ROOT'] . "/..";
+        if($dir === null) {
+            $dir = self::$directory ?? $_SERVER['DOCUMENT_ROOT'] . "/../logs/";
         }
 
-        if ($sizeCheck === false) {
+        if($sizeCheck === false && file_exists($dir . $file)) {
             //Check if the log size if more then 100 MB, if yes, tar.gz it. 102400000
-            if (filesize($dir . "/logs/" . $file) > 102400000) {
+            if(filesize( $dir . $file) > 102400000) {
                 $t = time();
-                $a = new \PharData(realpath("$dir/logs/") . "/$file.$t.tar");
+                $a = new \PharData(realpath($dir) . "$file.$t.tar");
 
-                $a->addFile(realpath("$dir/logs/$file"));
+                $a->addFile(realpath("{$dir}{$file}"));
 
                 $a->compress(\Phar::GZ);
 
-                unlink("$dir/logs/$file.$t.tar");
-                unlink("$dir/logs/$file");
+                unlink("{$dir}{$file}.$t.tar");
+                unlink("{$dir}{$file}");
             }
             Cache::save("__Logger__sizeChecked__$file.info", "t");
         }
-        return file_put_contents($dir . "/logs/" . $file, "[" . date("d/m/Y H:i:s") . "] " . $text . " -  " . debug_backtrace()[0]['file'] . "@" . debug_backtrace()[1]['function'] . "() \r\n", FILE_APPEND | LOCK_EX);
+        $text .= ( isset($GLOBALS["request"]) ? " | " . ($GLOBALS["request"]->getClientID() ?? null): '');
+        return file_put_contents ('panx://'. $dir . $file , "[".date("d/m/Y H:i:s")."] ".$text . " -  ".debug_backtrace()[0]['file']."@" . debug_backtrace()[1]['function'] ."() \r\n", FILE_APPEND | LOCK_EX);
     }
 
-    //alias
+    /**
+     * Alias to log()
+     */
     public static function write(string $text, string $file = "main.log", ?string $dir = null) {self::log($text, $file, $dir);}
+
+    /**
+     * Sets logs' directory.
+     */
+    public static function setDirectory($directory) {
+        self::$directory = $directory;
+    }
 }

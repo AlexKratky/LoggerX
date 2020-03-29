@@ -13,6 +13,10 @@ Writing data to log using panx-framework is quite easy. All you need to do, is c
 This function returns the number of bytes that were written to the file, or **FALSE** on failure. So if you want to check, if the data was written successfully, you can do it by:
 
 ```php
+require 'vendor/autoload.php';
+
+use AlexKratky\Logger;
+
 if(Logger::log("text") !== false) {
     // data was written successfully
 } else {
