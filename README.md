@@ -16,6 +16,10 @@ This function returns the number of bytes that were written to the file, or **FA
 require 'vendor/autoload.php';
 
 use AlexKratky\Logger;
+use AlexKratky\Cache;
+
+Logger::setDirectory(__DIR__ . '/logs/');
+Cache::setDirectory(__DIR__ . '/logs/');
 
 if(Logger::log("text") !== false) {
     // data was written successfully
